@@ -16,20 +16,19 @@ def get_system_info():
 def ping_host(host):
     try:
         # TODO: Replace 'ping' command for cross-platform if needed
-        output = subprocess.check_output(["ping", "-c", "1", host], stderr=subprocess.DEVNULL).decode()
+        output = subprocess.check_output(["ping", "-n", "1", host], stderr=subprocess.DEVNULL).decode()
         ms = parse_ping_time(output)
         return ("UP", ms)
     except:
         return ("DOWN", -1)
 
 def parse_ping_time(output):
-    # TODO: Extract ping time from command output
-    # For example: "time=21.3 ms"
+    # Extract ping time from Windows ping output
     for line in output.splitlines():
-        if "time=" in line:
-            parts = line.split("time=")
-            if len(parts) > 1:
-                return float(parts[1].split()[0])
+        if "time=" in line or "time<" in line:
+            # Handle both "time=" and "time<" cases
+            time_str = line.split("time")[1].strip("=<").split()[0]
+            return float(time_str)
     return -1
 
 def write_log(data):
